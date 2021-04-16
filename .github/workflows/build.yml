@@ -1,0 +1,32 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install bootimage
+      run: cargo install bootimage
+    - name: Install llvm-tools-preview
+      run: rustup component add llvm-tools-preview
+    - name: Set Rust channel to nightly
+      run: rustup override set nightly
+  
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build
+      run: cargo build --verbose
+
