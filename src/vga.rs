@@ -146,6 +146,7 @@ pub fn _print(args: fmt::Arguments) {
     WRITER.lock().write_fmt(args).unwrap();
 }
 
+#[allow(dead_code)]
 pub fn print_welcome() {
     const THERMITEOS_VERSION: &'static str = env!("CARGO_PKG_VERSION");
     println!("Welcome to thermiteos {}!", THERMITEOS_VERSION);

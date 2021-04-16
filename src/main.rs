@@ -12,7 +12,7 @@ use core::panic::PanicInfo;
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    vga::print_welcome();
+    thermiteos::init();
 
     #[cfg(test)]
     test_main();
