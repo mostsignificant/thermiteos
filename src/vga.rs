@@ -83,9 +83,9 @@ impl Writer {
         for byte in s.bytes() {
             match byte {
                 // printable ASCII byte or newline (https://en.wikipedia.org/wiki/Code_page_437)
-                0x20..=0x7e | b'\n' => self.write_byte(byte),
+                0x20..=0x7E | b'\n' => self.write_byte(byte),
                 // not part of printable ASCII range
-                _ => self.write_byte(0xfe),
+                _ => self.write_byte(0xFE),
             }
 
         }
@@ -125,7 +125,7 @@ lazy_static! {
     pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
         column_pos: 0,
         color_code: ColorCode::new(Color::Yellow, Color::Black),
-        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
+        buffer: unsafe { &mut *(0xB8000 as *mut Buffer) },
     });
 }
 
@@ -149,4 +149,26 @@ pub fn _print(args: fmt::Arguments) {
 pub fn print_welcome() {
     const THERMITEOS_VERSION: &'static str = env!("CARGO_PKG_VERSION");
     println!("Welcome to thermiteos {}!", THERMITEOS_VERSION);
+}
+
+#[test_case]
+fn test_println_simple() {
+    println!("test_println_simple output");
+}
+
+#[test_case]
+fn test_println_many() {
+    for _ in 0..200 {
+        println!("test_println_many output");
+    }
+}
+
+#[test_case]
+fn test_println_output() {
+    let s = "Some test string that fits on a single line";
+    println!("{}", s);
+    for (i, c) in s.chars().enumerate() {
+        let screen_char = WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
+        assert_eq!(char::from(screen_char.ascii_char), c);
+    }
 }
