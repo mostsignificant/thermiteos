@@ -1,3 +1,5 @@
+//! An experimental operating system following the blog series by Philipp Oppermann at <https://os.phil-opp.com>.
+
 #![no_std]
 #![cfg_attr(test, no_main)]
 #![feature(abi_x86_interrupt)]
@@ -12,11 +14,19 @@ pub mod idt;
 pub mod serial;
 pub mod vga;
 
+/// Initializes the global descriptor and interrupt descriptor table, prints the welcome message.
 pub fn init() {
     gdt::init();
     idt::init();
 
     vga::print_welcome();
+}
+
+/// Endless looping via the HLT instruction.
+pub fn hlt_loop() -> ! {
+    loop {
+        x86_64::instructions::hlt();
+    }
 }
 
 pub trait Testable {
@@ -46,7 +56,7 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
     serial_println!("[failed]\n");
     serial_println!("Error: {}\n", info);
     exit_qemu(QemuExitCode::Failed);
-    loop {}
+    hlt_loop();
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -65,13 +75,13 @@ pub fn exit_qemu(exit_code: QemuExitCode) {
     }
 }
 
-/// Entry point for `cargo xtest`
+/// Entry point for `cargo test`
 #[cfg(test)]
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     init();
     test_main();
-    loop {}
+    hlt_loop();
 }
 
 #[cfg(test)]

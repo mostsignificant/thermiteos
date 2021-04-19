@@ -1,3 +1,5 @@
+//! Wraps the VGA screen buffer and allows printing to it.
+
 use core::fmt;
 use lazy_static::lazy_static;
 use spin::Mutex;
@@ -50,6 +52,7 @@ struct Buffer {
     chars: [[Volatile<ScreenChar>; BUFFER_WIDTH]; BUFFER_HEIGHT],
 }
 
+/// Wraps a VGA buffer and allows writing to it.
 pub struct Writer {
     column_pos: usize,
     color_code: ColorCode,
@@ -57,6 +60,7 @@ pub struct Writer {
 }
 
 impl Writer {
+    /// Writes a single byte to the VGA buffer and handles '\n' and '\r'.
     pub fn write_byte(&mut self, byte: u8) {
         match byte {
             b'\n' => self.new_line(),
@@ -79,6 +83,7 @@ impl Writer {
         }
     }
 
+    /// Writes all printable ASCII bytes in the given string byte wise to the VGA buffer.
     pub fn write_string(&mut self, s: &str) {
         for byte in s.bytes() {
             match byte {
@@ -91,6 +96,7 @@ impl Writer {
         }
     }
 
+    /// Shifts the VGA buffer lines up and appends a new line at the bottom.
     fn new_line(&mut self) {
         for row in 1..BUFFER_HEIGHT {
             for col in 0..BUFFER_WIDTH {
@@ -102,6 +108,7 @@ impl Writer {
         self.column_pos = 0;
     }
 
+    /// Clears a whole line with blanks.
     fn clear_line(&mut self, row: usize) {
         let blank = ScreenChar {
             ascii_char: b' ',
@@ -122,6 +129,7 @@ impl fmt::Write for Writer {
 }
 
 lazy_static! {
+    /// Static variable for write access to the VGA buffer.
     pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
         column_pos: 0,
         color_code: ColorCode::new(Color::Yellow, Color::Black),
@@ -129,11 +137,13 @@ lazy_static! {
     });
 }
 
+/// Prints to the host via the VGA buffer.
 #[macro_export]
 macro_rules! print {
     ($($arg:tt)*) => ($crate::vga::_print(format_args!($($arg)*)));
 }
 
+/// Prints to the host via the VGA buffer, appending a newline.
 #[macro_export]
 macro_rules! println {
     () => ($crate::print!("\n"));
@@ -143,7 +153,11 @@ macro_rules! println {
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
-    WRITER.lock().write_fmt(args).unwrap();
+    use x86_64::instructions::interrupts;
+
+    interrupts::without_interrupts(|| { 
+        WRITER.lock().write_fmt(args).unwrap();
+    });
 }
 
 #[allow(dead_code)]
@@ -166,10 +180,16 @@ fn test_println_many() {
 
 #[test_case]
 fn test_println_output() {
+    use core::fmt::Write;
+    use x86_64::instructions::interrupts;
+
     let s = "Some test string that fits on a single line";
-    println!("{}", s);
-    for (i, c) in s.chars().enumerate() {
-        let screen_char = WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
-        assert_eq!(char::from(screen_char.ascii_char), c);
-    }
+    interrupts::without_interrupts(|| {
+        let mut writer = WRITER.lock();
+        writeln!(writer, "\n{}", s).expect("writeln failed");
+        for (i, c) in s.chars().enumerate() {
+            let screen_char = writer.buffer.chars[BUFFER_HEIGHT - 2][i].read();
+            assert_eq!(char::from(screen_char.ascii_char), c);
+        }
+    });
 }

@@ -1,3 +1,5 @@
+//! Manages the global descriptor table of the OS and the task state segment.
+
 use x86_64::VirtAddr;
 use x86_64::structures::gdt::{Descriptor, GlobalDescriptorTable, SegmentSelector};
 use x86_64::structures::tss::TaskStateSegment;
@@ -34,6 +36,7 @@ struct Selectors {
     tss_selector: SegmentSelector,
 }
 
+/// Loads the global descriptor table and sets code and task state segment selector.
 pub fn init() {
     use x86_64::instructions::segmentation::set_cs;
     use x86_64::instructions::tables::load_tss;
