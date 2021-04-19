@@ -26,7 +26,7 @@ jobs:
     - name: Build
       run: cargo build --verbose
     - name: Install grub
-      run: sudo apt-get -y install grub
+      run: sudo apt-get -y install grub2-common
     - name: Make isofiles dir
       run: mkdir isofiles/boot/grub
     - name: Copy grub.cfg
