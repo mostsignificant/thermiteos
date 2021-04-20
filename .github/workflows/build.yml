@@ -32,6 +32,6 @@ jobs:
     - name: Copy grub.cfg
       run: cp grub.cfg isofiles/boot/grub/grub.cfg
     - name: Copy kernel bootimage
-      run: cp /target/x86_64-thermiteos/debug/bootimage-thermiteos.bin isofiles/boot/
+      run: cp target/x86_64-thermiteos/debug/bootimage-thermiteos.bin isofiles/boot/
     - name: Create iso
       run: exec grub-mkrescue -o thermiteos.iso isofiles
