@@ -28,7 +28,7 @@ jobs:
     - name: Install grub
       run: sudo apt-get -y install grub2-common
     - name: Make isofiles dir
-      run: mkdir isofiles/boot/grub
+      run: mkdir -p isofiles/boot/grub
     - name: Copy grub.cfg
       run: cp grub.cfg isofiles/boot/grub/grub.cfg
     - name: Copy kernel bootimage
