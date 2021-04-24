@@ -26,7 +26,7 @@ jobs:
         cargo build --verbose
     - name: Make ISO
       run: |
-        sudo apt-get -y install grub2-common tree
+        sudo apt-get -y install grub2-common mtools
         mkdir -p isofiles/boot/grub
         cp grub.cfg isofiles/boot/grub/grub.cfg
         cp target/x86_64-thermiteos/debug/thermiteos isofiles/boot/
