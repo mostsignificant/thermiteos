@@ -29,7 +29,5 @@ jobs:
         sudo apt-get -y install grub2-common tree
         mkdir -p isofiles/boot/grub
         cp grub.cfg isofiles/boot/grub/grub.cfg
-        tree .
-        fint . -name "*bootimage*"
-        cp target/x86_64-thermiteos/release/bootimage-thermiteos.bin isofiles/boot/
+        cp target/x86_64-thermiteos/debug/thermiteos isofiles/boot/
         exec grub-mkrescue -o thermiteos.iso isofiles
