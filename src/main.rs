@@ -1,17 +1,23 @@
-
 #![no_main]
 #![no_std]
 #![feature(custom_test_frameworks)]
 #![reexport_test_harness_main = "test_main"]
 #![test_runner(thermiteos::test_runner)]
 
+mod memory;
 mod serial;
 mod vga;
 
+use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
 
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
+entry_point!(kernel_main);
+
+/// Defines the entry point called externally from the bootloader
+fn kernel_main(boot_info: &'static BootInfo) -> ! {
+    use thermiteos::memory::BootInfoFrameAllocator;
+    let mut frame_allocator = unsafe { BootInfoFrameAllocator::init(&boot_info.memory_map) };
+
     thermiteos::init();
 
     #[cfg(test)]

@@ -9,8 +9,15 @@
 
 use core::panic::PanicInfo;
 
+#[cfg(test)]
+use bootloader::{entry_point, BootInfo};
+
+#[cfg(test)]
+entry_point!(test_kernel_main);
+
 pub mod gdt;
 pub mod idt;
+pub mod memory;
 pub mod serial;
 pub mod vga;
 
@@ -63,7 +70,7 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
 #[repr(u32)]
 pub enum QemuExitCode {
     Success = 0x10,
-    Failed  = 0x11,
+    Failed = 0x11,
 }
 
 pub fn exit_qemu(exit_code: QemuExitCode) {
@@ -77,8 +84,7 @@ pub fn exit_qemu(exit_code: QemuExitCode) {
 
 /// Entry point for `cargo test`
 #[cfg(test)]
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
+fn test_kernel_main() -> ! {
     init();
     test_main();
     hlt_loop();

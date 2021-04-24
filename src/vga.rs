@@ -92,7 +92,6 @@ impl Writer {
                 // not part of printable ASCII range
                 _ => self.write_byte(0xFE),
             }
-
         }
     }
 
@@ -155,7 +154,7 @@ pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
     use x86_64::instructions::interrupts;
 
-    interrupts::without_interrupts(|| { 
+    interrupts::without_interrupts(|| {
         WRITER.lock().write_fmt(args).unwrap();
     });
 }
