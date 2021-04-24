@@ -15,23 +15,21 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
-    - name: Install bootimage
-      run: cargo install bootimage
-    - name: Set nightly
-      run: rustup override set nightly
-    - name: Install llvm-tools-preview
-      run: rustup component add llvm-tools-preview
-    - name: Install rust-src
-      run: rustup component add rust-src
-    - name: Build
-      run: cargo build --verbose
-    - name: Install grub
-      run: sudo apt-get -y install grub2-common
-    - name: Make isofiles dir
-      run: mkdir -p isofiles/boot/grub
-    - name: Copy grub.cfg
-      run: cp grub.cfg isofiles/boot/grub/grub.cfg
-    - name: Copy kernel bootimage
-      run: cp target/x86_64-thermiteos/debug/bootimage-thermiteos.bin isofiles/boot/
-    - name: Create iso
-      run: exec grub-mkrescue -o thermiteos.iso isofiles
+    - name: Prepare CI
+      run: |
+        cargo install bootimage
+        rustup override set nightly
+        rustup component add llvm-tools-preview
+        rustup component add rust-src
+    - name: Build OS
+      run: |
+        cargo build --verbose
+    - name: Make ISO
+      run: |
+        sudo apt-get -y install grub2-common tree
+        mkdir -p isofiles/boot/grub
+        cp grub.cfg isofiles/boot/grub/grub.cfg
+        tree .
+        fint . -name "*bootimage*"
+        cp target/x86_64-thermiteos/release/bootimage-thermiteos.bin isofiles/boot/
+        exec grub-mkrescue -o thermiteos.iso isofiles
