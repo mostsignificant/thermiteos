@@ -1,5 +1,5 @@
 # thermiteos
-An experimental operating system build with Rust.
+An experimental operating system built with Rust.
 
 The project is built upon the excellent blog articles by Philipp Oppenheimer at https://os.phil-opp.com/.
 
